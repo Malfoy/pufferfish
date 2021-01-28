@@ -45,7 +45,9 @@ int doPufferfishTestLookup(IndexT& pi, pufferfish::ValidateOptions& validateOpts
       // Here, rg will contain a chunk of read pairs
       // we can process.
       #pragma omp parallel for
-      for (auto& rp : rg) {
+      //for (auto& rp : rg) {
+      for(uint64_t i = 0; i <rg.size(); i++) {
+        auto rp(rg[i]);
         // kmer_pos = 0;
         #pragma omp atomic
         ++rn;
