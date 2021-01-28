@@ -4,6 +4,7 @@
 #include <iterator>
 #include <type_traits>
 #include <vector>
+#include "omp.h"
 
 #include "CLI/Timer.hpp"
 #include "CanonicalKmer.hpp"
@@ -43,52 +44,23 @@ int doPufferfishTestLookup(IndexT& pi, pufferfish::ValidateOptions& validateOpts
     while (parser.refill(rg)) {
       // Here, rg will contain a chunk of read pairs
       // we can process.
+      #pragma omp parallel for
       for (auto& rp : rg) {
         // kmer_pos = 0;
-        if (rn % 500000 == 0) {
-          std::cerr << "rn : " << rn << "\n";
-          std::cerr << "found = " << found << ", notFound = " << notFound
-                    << ", total hits = " << totalHits << "\n";
-        }
+        #pragma omp atomic
         ++rn;
         auto& r1 = rp.seq;
-        /*
-        CanonicalKmer mer;
-        bool valid = true;
-        int lastinvalid = -1;
-          for (size_t i = 0; i < r1.length(); ++i) {
-          int c = kmers::codeForChar(r1[i]);
-          if (c != -1) {
-            mer.shiftFw(r1[i]);
-            valid = (i - lastinvalid >= k);
-          } else {
-            lastinvalid = i;
-            valid = false;
-          }
-          if (i >= k - 1 and valid) {
-            auto phits = pi.getRefPos(mer);
-            if (phits.empty()) {
-            ++notFound;
-            } else {
-            ++found;
-            bool cor = false;
-            uint32_t clen = 0;
-            std::vector<uint32_t> wrongPos;
-            for (auto& rpos : phits.refRange) {
-            ++totalHits;
-            }
-            }
-           }
-           }
-          */
 
         pufferfish::CanonicalKmerIterator kit1(r1);
         for (; kit1 != kit_end; ++kit1) {
           auto phits = pi.getRefPos(kit1->first, qc);
           if (phits.empty()) {
+            #pragma omp atomic
             ++notFound;
           } else {
+            #pragma omp atomic
             ++found;
+            #pragma omp atomic
             totalHits += phits.refRange.size();
           }
         }

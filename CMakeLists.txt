@@ -55,11 +55,13 @@ if (NOT CMAKE_BUILD_TYPE)
    set (CMAKE_BUILD_TYPE "Release")
 endif()
 
+find_package(OpenMP REQUIRED)
+
 # We require C++14
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++")
-#set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+#SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++ -fopenmp")
+#set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -fopenmp")
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -74,8 +76,8 @@ if (NOT GAT_SOURCE_DIR)
 endif()
 
 set(KSW_FLAGS "-DHAVE_KALLOC")
-#set(PF_CPP_FLAGS "-msse4;-W;-Wall;-Wextra;-Wpointer-arith;-Wunused;-Wwrite-strings;-Wno-unknown-pragmas;-Wno-unused-function")
-set(PF_CPP_FLAGS "-W;-Wall;-Wextra;-Wpointer-arith;-Wunused;-Wwrite-strings;-Wno-unknown-pragmas;-Wno-unused-function")
+#set(PF_CPP_FLAGS "-msse4;-W;-Wall;-Wextra;-Wpointer-arith;-Wunused;-Wwrite-strings;-Wno-unknown-pragmas;-Wno-unused-function;-fopenmp")
+set(PF_CPP_FLAGS "-W;-Wall;-Wextra;-Wpointer-arith;-Wunused;-Wwrite-strings;-Wno-unknown-pragmas;-Wno-unused-function;-fopenmp")
 
 if (BUILD_PUFF_FOR_SALMON)
     #list(APPEND PF_CPP_FLAGS "-Wno-unused-parameter") 
@@ -92,7 +94,7 @@ endif()
 if (ASAN_BUILD)
   list(APPEND PF_CPP_FLAGS "-fsanitize=address")
 #list(APPEND PF_CPP_FLAGS "-fsanitize=undefined")
-#set(CMAKE_LINK_FLAGS "-fsanitize=address")
+#set(CMAKE_LINK_FLAGS "-fsanitize=address -fopenmp")
 #list(APPEND CMAKE_LINK_FLAGS "-fsanitize=undefined")
 # list(APPEND PF_CPP_FLAGS "-g")
   set(ASAN_LIB "asan")
@@ -107,7 +109,7 @@ set(WARN_ALL_THINGS "-fdiagnostics-color=always;-Wall;-Wcast-align;-Wcast-qual;-
 
 #set(WARN_ALL_THINGS "-fdiagnostics-color=always -Wall -Wcast-align -Wcast-qual -Wconversion -Wctor-dtor-privacy -Wdisabled-optimization -Wdouble-promotion -Wduplicated-branches -Wduplicated-cond -Wextra -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wno-sign-conversion -Wnoexcept -Wnull-dereference -Wold-style-cast -Woverloaded-virtual -Wpedantic -Wredundant-decls -Wrestrict -Wshadow -Wstrict-aliasing=1 -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wno-unknown-pragmas -Wuseless-cast") 
 
-set(OPT_FLAGS "-DSTX_NO_STD_STRING_VIEW;-O3;-fPIC;-DNDEBUG;-funroll-loops;-ftree-vectorize;-fno-strict-aliasing")
+set(OPT_FLAGS "-DSTX_NO_STD_STRING_VIEW;-O3;-fPIC;-DNDEBUG;-funroll-loops;-ftree-vectorize;-fno-strict-aliasing;-fopenmp")
 set(DEBUG_FLAGS "-pg;-g;-gstabs")
 
 ##
@@ -124,7 +126,7 @@ if(APPLE)
 else()
     # We're in sane linux world
     set(SHARED_LIB_EXTENSION "so")
-    set(LIBSALMON_LINKER_FLAGS "")
+    set(LIBSALMON_LINKER_FLAGS "-fopenmp")
 #    if (NOT BUILD_PUFF_FOR_SALMON)
 #        set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
 #        list(APPEND PF_CPP_FLAGS -static-libstdc++)
